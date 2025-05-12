@@ -1,5 +1,4 @@
 from sqlmodel import SQLModel, create_engine, Session
-from contextlib import contextmanager
 from .config import settings
 
 # Explicitly importing the models into memory so we can create our tables with create_all()
@@ -15,7 +14,8 @@ engine = create_engine(
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
-@contextmanager
+# @contextmanager -> not needed because FastAPI sees the yield and treat it like a dependency generator 
+# This happens because we are calling Depends() on get_session
 def get_session():
     with Session(engine) as session:
         yield session
