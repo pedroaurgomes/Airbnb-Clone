@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from app.core.db import get_session
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.models.user import User
-from app.schemas.user import UserCreate, UserRead
+from app.schemas.user import UserCreate, UserRead, UserLogin
 
 router = APIRouter()
 
@@ -34,3 +34,16 @@ def signup(user_create: UserCreate, session: Session = Depends(get_session)):
 
     # 5. Return the created user (without password)
     return user # pydantic will match it with our response model UserRead
+
+@router.post("/login", response_model=UserRead)
+def login(user_login: UserLogin, session: Session = Depends(get_session)):
+    statement = select(User).where(User.email == user_login.email)
+    user = session.exec(statement).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid email or password.")
+
+    if not verify_password(user_login.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid email or password.")
+
+    return user
