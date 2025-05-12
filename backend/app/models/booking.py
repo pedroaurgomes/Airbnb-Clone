@@ -1,11 +1,17 @@
-from sqlmodel import SQLModel, Field
-import uuid
+from sqlmodel import SQLModel, Field, UniqueConstraint
 from datetime import date
+from typing import Optional
 
 class Booking(SQLModel, table=True):
-    __tablename__ = "bookings"
+    # __tablename__ = "bookings"
 
-    guest_id: uuid.UUID = Field(foreign_key="users.user_id", primary_key=True)
-    property_id: uuid.UUID = Field(foreign_key="properties.property_id", primary_key=True)
-    date_in: date = Field(primary_key=True)
+    booking_id: Optional[int] = Field(default=None, primary_key=True)
+    guest_id: int = Field(foreign_key="user.user_id")
+    property_id: int = Field(foreign_key="property.property_id")
+    date_in: date
     date_out: date
+
+    class Config:
+        table_constraints = (
+            UniqueConstraint("guest_id", "property_id", "date_in"),
+        )

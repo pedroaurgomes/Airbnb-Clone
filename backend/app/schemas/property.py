@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import List
-from uuid import UUID
 
 # request model
 class PropertyCreate(BaseModel):
@@ -14,7 +13,7 @@ class PropertyCreate(BaseModel):
 
 # response model
 class PropertyRead(BaseModel):
-    property_id: UUID
+    property_id: int
     title: str
     description: str
     address: str

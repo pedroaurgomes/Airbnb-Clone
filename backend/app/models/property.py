@@ -1,11 +1,11 @@
 from sqlmodel import SQLModel, Field
-import uuid
+from typing import Optional
 
 class Property(SQLModel, table=True):
-    __tablename__ = "properties"
+    # __tablename__ = "properties"
 
-    property_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    host_id: uuid.UUID = Field(foreign_key="users.user_id")
+    property_id: Optional[int] = Field(default=None, primary_key=True)
+    host_id: int = Field(foreign_key="user.user_id")
     title: str
     address: str
     city: str
