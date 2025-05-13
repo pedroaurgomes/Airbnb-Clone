@@ -16,8 +16,8 @@ async def lifespan(app: FastAPI):
     
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(users_router, prefix="/v1/users")
-app.include_router(properties_router, prefix="/v1")
+app.include_router(users_router, prefix="/v1/users", tags=["users"])
+app.include_router(properties_router, prefix="/v1", tags=["properties"])
 
 app.add_middleware(
     CORSMiddleware,
