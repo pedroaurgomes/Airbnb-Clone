@@ -4,7 +4,6 @@ from typing import List
 # request model
 class PropertyCreate(BaseModel):
     title: str
-    description: str
     address: str
     city: str
     state: str
@@ -15,7 +14,6 @@ class PropertyCreate(BaseModel):
 class PropertyRead(BaseModel):
     property_id: int
     title: str
-    description: str
     address: str
     city: str
     state: str
