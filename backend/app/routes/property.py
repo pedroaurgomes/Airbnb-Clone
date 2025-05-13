@@ -1,16 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from app.core.db import get_session
 from app.models.property import Property
 from app.schemas.property import PropertyCreate, PropertyRead
 import json
+from app.core.dependencies import get_current_user
 
 router = APIRouter()
 
 @router.post("/properties", response_model=PropertyRead)
-def create_property(property_in: PropertyCreate, session: Session = Depends(get_session)):
-    # For now, hardcode host_id=1 (later you can extract from login if using JWTs)
-    host_id = 1  # TO BE FIXED later with real user authentication
+def create_property(
+    property_in: PropertyCreate, 
+    session: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user)
+    ):
+
+    host_id = current_user["user_id"]
+
+    if current_user["role"] != "host":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only hosts can create properties"
+        ) 
 
     property = Property(
         title=property_in.title,
