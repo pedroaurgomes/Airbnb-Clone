@@ -20,7 +20,7 @@ def create_property(
     if current_user["role"] != "host":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only hosts can create properties"
+            detail="Only hosts can create properties."
         ) 
 
     property = Property(
