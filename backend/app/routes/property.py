@@ -8,7 +8,7 @@ from app.core.dependencies import get_current_user
 
 router = APIRouter()
 
-@router.post("/properties", response_model=PropertyRead)
+@router.post("", response_model=PropertyRead)
 def create_property(
     property_in: PropertyCreate, 
     session: Session = Depends(get_session),
