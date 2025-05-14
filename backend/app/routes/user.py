@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.db import get_session
-from app.core.security import hash_password, verify_password
+from app.core.security import hash_password, verify_password, create_access_token
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead, UserLogin
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
@@ -35,15 +36,27 @@ def signup(user_create: UserCreate, session: Session = Depends(get_session)):
     # 5. Return the created user (without password)
     return user # pydantic will match it with our response model UserRead
 
-@router.post("/login", response_model=UserRead)
-def login(user_login: UserLogin, session: Session = Depends(get_session)):
-    statement = select(User).where(User.email == user_login.email)
+@router.post("/login")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(), 
+    session: Session = Depends(get_session)
+    ):
+
+    statement = select(User).where(User.email == form_data.username)
     user = session.exec(statement).first()
 
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid email or password.")
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Invalid email or password.",
+            headers={"WWW-Authenticate" : "Bearer"})
 
-    if not verify_password(user_login.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Invalid email or password.")
+    access_token = create_access_token (
+        data={"sub" : str(user.user_id), "role": user.role}
+        )
+ 
 
-    return user
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }

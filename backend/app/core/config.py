@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     frontend_url: str
     database_url: str
     environment: str = "development"
+    secret_key: str
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
     
     class Config:
         env_file = ".env.test" if os.getenv("ENVIRONMENT") == "test" else ".env" # use 'ENVIRONMENT=test pytest' when testing

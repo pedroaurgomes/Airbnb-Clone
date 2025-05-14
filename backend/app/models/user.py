@@ -7,7 +7,7 @@ class Role(str, Enum):
     host = "host"
 
 class User(SQLModel, table=True):
-    # __tablename__ = "users"
+    __tablename__ = "users"
 
     user_id: Optional[int] = Field(default=None, primary_key=True)
     name: str

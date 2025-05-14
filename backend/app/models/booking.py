@@ -3,11 +3,11 @@ from datetime import date
 from typing import Optional
 
 class Booking(SQLModel, table=True):
-    # __tablename__ = "bookings"
+    __tablename__ = "bookings"
 
     booking_id: Optional[int] = Field(default=None, primary_key=True)
-    guest_id: int = Field(foreign_key="user.user_id")
-    property_id: int = Field(foreign_key="property.property_id")
+    guest_id: int = Field(foreign_key="users.user_id")
+    property_id: int = Field(foreign_key="properties.property_id")
     date_in: date
     date_out: date
 
