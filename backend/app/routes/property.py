@@ -59,3 +59,23 @@ def list_my_properties(
         property.picture_urls = json.loads(property.picture_urls)
 
     return properties
+
+@router.get("", response_model=List[PropertyRead])
+def browse_properties(
+    session: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user)
+):
+    # Authorization: only guests can browse
+    if current_user["role"] != "guest":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only guests can browse available properties."
+        )
+
+    properties = session.exec(select(Property)).all()
+
+    # Deserialize picture_urls field
+    for property in properties:
+        property.picture_urls = json.loads(property.picture_urls)
+
+    return properties
