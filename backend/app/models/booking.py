@@ -13,5 +13,5 @@ class Booking(SQLModel, table=True):
 
     class Config:
         table_constraints = (
-            UniqueConstraint("guest_id", "property_id", "date_in"),
+            UniqueConstraint("property_id", "date_in"), # little extra check for now
         )

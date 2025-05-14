@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.core.db import create_db_and_tables
 from app.routes.user import router as users_router
 from app.routes.property import router as properties_router
+from app.routes.booking import router as bookings_router
 
 
 # for now we dont need the "async" because there are no async operations on startup or shutdown
@@ -18,6 +19,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(users_router, prefix="/v1/users", tags=["users"])
 app.include_router(properties_router, prefix="/v1/properties", tags=["properties"])
+app.include_router(bookings_router, prefix="/v1/bookings", tags=["Bookings"])
 
 app.add_middleware(
     CORSMiddleware,

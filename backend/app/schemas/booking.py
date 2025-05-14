@@ -4,7 +4,6 @@ from datetime import date
 
 # request model
 class BookingCreate(BaseModel):
-    booking_id: int
     property_id: int
     date_in: date
     date_out: date
@@ -12,6 +11,7 @@ class BookingCreate(BaseModel):
 
 # response model
 class BookingRead(BaseModel):
+    booking_id: int
     guest_id: int
     property_id: int
     date_in: date
