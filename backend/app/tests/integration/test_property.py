@@ -76,3 +76,42 @@ def test_unauthenticated_user_cannot_create_property():
     )
 
     assert response.status_code == 401
+
+def test_guest_can_view_property_details(setup_users):
+    # Host logs in
+    host_token = get_token(setup_users["host_email"], setup_users["password"])
+
+    # Host creates a property
+    response = client.post(
+        "/v1/properties",
+        headers={"Authorization": f"Bearer {host_token}"},
+        json={
+            "title": "Luxury Villa",
+            "address": "999 Rich Street",
+            "city": "Beverly Hills",
+            "state": "CA",
+            "picture_urls": ["https://example.com/villa1.jpg"]
+        }
+    )
+    assert response.status_code == 200
+    created_property = response.json()
+    property_id = created_property["property_id"]
+
+    # Guest logs in
+    guest_token = get_token(setup_users["guest_email"], setup_users["password"])
+
+    # Guest fetches property details
+    response = client.get(
+        f"/v1/properties/{property_id}",
+        headers={"Authorization": f"Bearer {guest_token}"}
+    )
+
+    assert response.status_code == 200
+    property_detail = response.json()
+
+    # Validate property details
+    assert property_detail["title"] == "Luxury Villa"
+    assert property_detail["address"] == "999 Rich Street"
+    assert property_detail["city"] == "Beverly Hills"
+    assert property_detail["state"] == "CA"
+    assert "https://example.com/villa1.jpg" in property_detail["picture_urls"]

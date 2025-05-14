@@ -8,7 +8,9 @@ from app.core.dependencies import get_current_user
 from typing import List
 from sqlmodel import Session, select
 
+
 router = APIRouter()
+
 
 @router.post("", response_model=PropertyRead)
 def create_property(
@@ -42,6 +44,7 @@ def create_property(
     property.picture_urls = json.loads(property.picture_urls) # deserialization
     return property
 
+
 @router.get("/mine", response_model=List[PropertyRead])
 def list_my_properties(
     session: Session = Depends(get_session),
@@ -59,6 +62,7 @@ def list_my_properties(
         property.picture_urls = json.loads(property.picture_urls)
 
     return properties
+
 
 @router.get("", response_model=List[PropertyRead])
 def browse_properties(
@@ -79,3 +83,30 @@ def browse_properties(
         property.picture_urls = json.loads(property.picture_urls)
 
     return properties
+
+
+@router.get("/{property_id}", response_model=PropertyRead)
+def get_property_details(
+    property_id: int,
+    session: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user)
+):
+    # Authorization: only guests can view property details
+    if current_user["role"] != "guest":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only guests can view property details."
+        )
+
+    property = session.get(Property, property_id)
+
+    if not property:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Property not found."
+        )
+
+    # Deserialize pictures
+    property.picture_urls = json.loads(property.picture_urls)
+
+    return property
