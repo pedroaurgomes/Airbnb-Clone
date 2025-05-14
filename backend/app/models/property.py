@@ -11,4 +11,4 @@ class Property(SQLModel, table=True):
     address: str
     city: str
     state: str
-    pictures_urls: str  # JSON serialized list of URLs
+    picture_urls: str  # JSON serialized list of URLs

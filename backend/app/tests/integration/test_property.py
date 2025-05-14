@@ -7,21 +7,11 @@ from app.core.security import hash_password
 from app.core.config import settings
 import pytest
 from app.tests.utils.factories import create_test_user
+from app.tests.utils.auth import get_token
 
 
 client = TestClient(app)
 
-# Helper: Login and retrieve token
-def get_token(email: str, password: str):
-    response = client.post(
-        "/v1/users/login",
-        data={
-            "username": email,  # OAuth2 expects username field
-            "password": password
-        },
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    return response.json()["access_token"]
 
 @pytest.fixture
 def setup_users():
@@ -46,7 +36,7 @@ def test_host_can_create_property(setup_users):
             "address": "123 Test Street",
             "city": "Test City",
             "state": "TS",
-            "pictures_urls": ["https://example.com/photo.jpg"]
+            "picture_urls": ["https://example.com/photo.jpg"]
         }
     )
 
@@ -66,7 +56,7 @@ def test_guest_cannot_create_property(setup_users):
             "address": "123 Guest Road",
             "city": "Guest City",
             "state": "GC",
-            "pictures_urls": ["https://example.com/guest.jpg"]
+            "picture_urls": ["https://example.com/guest.jpg"]
         }
     )
 
@@ -81,7 +71,7 @@ def test_unauthenticated_user_cannot_create_property():
             "address": "123 Nowhere",
             "city": "No City",
             "state": "NC",
-            "pictures_urls": ["https://example.com/nopic.jpg"]
+            "picture_urls": ["https://example.com/nopic.jpg"]
         }
     )
 

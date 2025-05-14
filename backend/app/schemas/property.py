@@ -7,7 +7,7 @@ class PropertyCreate(BaseModel):
     address: str
     city: str
     state: str
-    pictures_urls: List[str]
+    picture_urls: List[str]
     # host_id filled automactiacally by backend based on the logged-in user
 
 # response model
@@ -17,5 +17,5 @@ class PropertyRead(BaseModel):
     address: str
     city: str
     state: str
-    pictures_urls: List[str]
+    picture_urls: List[str]
     # no need to expose the host_id to the frontend
