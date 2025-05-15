@@ -23,11 +23,11 @@ export default function Navbar() {
               isAuthenticated ? (
                 <>
                   {userRole === 'host' ? (
-                    <Link href="/my-properties" className="text-gray-700 hover:text-rose-500 font-medium">
+                    <Link href="/host" className="text-gray-700 hover:text-rose-500 font-medium">
                       My Properties
                     </Link>
                   ) : (
-                    <Link href="/browse-properties" className="text-gray-700 hover:text-rose-500 font-medium">
+                    <Link href="/" className="text-gray-700 hover:text-rose-500 font-medium">
                       Browse
                     </Link>
                   )}

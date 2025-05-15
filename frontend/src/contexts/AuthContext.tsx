@@ -1,8 +1,16 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
 
 type UserRole = 'guest' | 'host';
+
+interface JWTPayload {
+  sub: string;
+  role: UserRole;
+  exp: number;
+}
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -18,16 +26,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    const storedRole = localStorage.getItem('userRole') as UserRole | null;
-    setIsAuthenticated(!!storedToken);
-    setUserRole(storedRole);
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode<JWTPayload>(storedToken);
+        console.log('Decoded token:', decoded);
+        const role = decoded.role;
+        console.log('User role from token:', role);
+        setUserRole(role);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+      }
+    }
     setIsLoading(false);
   }, []);
 
   const login = (token: string, role: UserRole) => {
+    console.log('Logging in with role:', role);
     localStorage.setItem('token', token);
     localStorage.setItem('userRole', role);
     setIsAuthenticated(true);
@@ -35,10 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    console.log('Logging out');
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
     setIsAuthenticated(false);
     setUserRole(null);
+    router.push('/login');
   };
 
   return (
