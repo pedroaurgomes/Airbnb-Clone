@@ -60,7 +60,7 @@ You can find detailed explanations of:
 - Key technical and design choices (/docs/DESIGN_DECISIONS.md)
 
 ## Folder Structure
-.
+``` .
 ├── LICENSE
 ├── README.md
 ├── backend
@@ -84,6 +84,7 @@ You can find detailed explanations of:
     ├── src
     ├── tailwind.config.js
     └── tsconfig.json
+```
 
 ## Future improvements
 If I were to keep developing and scaling the project, I would: 
