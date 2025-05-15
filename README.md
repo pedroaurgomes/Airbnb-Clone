@@ -27,6 +27,7 @@ A simple Airbnb-like platform built in less than a week as a technical case/chal
 | ORM | SQLModel | Combines Pydantic models and SQLAlchemy in a clean, efficient way |
 | Authentication | JWT (JSON Web Tokens) | Stateless, scalable authentication mechanism |
 | API Testing | Swagger UI | Built-in FastAPI |
+| Cloud Storage for images | Cloudinary | Easy setup and free tier|
 
 I specially chose Next.js because I wanted to learn it, and Python because I have background on it and I needed speed (it was an one week project).
 
