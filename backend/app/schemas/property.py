@@ -18,4 +18,5 @@ class PropertyRead(BaseModel):
     city: str
     state: str
     picture_urls: List[str]
+    host_name: str
     # no need to expose the host_id to the frontend

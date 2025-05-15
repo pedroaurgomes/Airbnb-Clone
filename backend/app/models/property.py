@@ -1,8 +1,12 @@
-from sqlmodel import SQLModel, Field
-from typing import Optional
-from typing import List
+from __future__ import annotations
 
-class Property(SQLModel, table=True):
+from sqlmodel import Field, Relationship
+from typing import Optional, ClassVar, Any
+from sqlalchemy.orm import Mapped, relationship
+from .base import SQLModelBase
+
+
+class Property(SQLModelBase, table=True):
     __tablename__ = "properties"
 
     property_id: Optional[int] = Field(default=None, primary_key=True)
@@ -12,3 +16,6 @@ class Property(SQLModel, table=True):
     city: str
     state: str
     picture_urls: str  # JSON serialized list of URLs
+
+    # Define relationships using SQLAlchemy's relationship directly
+    host: ClassVar[Any] = relationship("User", back_populates="properties")
