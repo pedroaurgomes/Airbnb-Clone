@@ -1,6 +1,7 @@
-from sqlmodel import SQLModel, Field, UniqueConstraint
+from sqlmodel import SQLModel, UniqueConstraint
 from datetime import date
 from typing import Optional
+from sqlmodel import SQLModel, Field
 
 class Booking(SQLModel, table=True):
     __tablename__ = "bookings"
@@ -13,5 +14,5 @@ class Booking(SQLModel, table=True):
 
     class Config:
         table_constraints = (
-            UniqueConstraint("property_id", "date_in"), # little extra check for now
+            UniqueConstraint("property_id", "date_in"),
         )

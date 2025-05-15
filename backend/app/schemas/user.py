@@ -1,20 +1,22 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-from app.models.user import Role
+from typing import Optional, Literal
+
+# Define valid roles as a Literal type
+RoleType = Literal["guest", "host"]
 
 # singup request model
 class UserCreate(BaseModel):
     name: str
     email: EmailStr # validates email format automatically
     password: str
-    role: Role # accepting only "guest" or "host"
+    role: RoleType # accepting only "guest" or "host"
 
 # signup/login response model
 class UserRead(BaseModel):
     user_id: int
     name: str
     email: EmailStr
-    role: Role
+    role: RoleType
 
 # login request model
 class UserLogin(BaseModel):

@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
+from sqlmodel import Session, select
 from app.core.db import get_session
 from app.models.property import Property
 from app.schemas.property import PropertyCreate, PropertyRead
 import json
 from app.core.dependencies import get_current_user
 from typing import List
-from sqlmodel import Session, select
 
 
 router = APIRouter()
@@ -75,14 +74,28 @@ def browse_properties(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only guests can browse available properties."
         )
+    
+    properties = session.exec(
+        select(Property)
+    ).all()
 
-    properties = session.exec(select(Property)).all()
-
+    result = []
     # Deserialize picture_urls field
     for property in properties:
         property.picture_urls = json.loads(property.picture_urls)
 
-    return properties
+        property_read = PropertyRead(
+            property_id=property.property_id,
+            title=property.title,
+            address=property.address,
+            city=property.city,
+            state=property.state,
+            picture_urls=property.picture_urls,
+            host_name=property.host.name  # ← fetching host name!
+        )
+        result.append(property_read)
+
+    return result
 
 
 @router.get("/{property_id}", response_model=PropertyRead)
