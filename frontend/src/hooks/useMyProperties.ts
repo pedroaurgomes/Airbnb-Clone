@@ -1,6 +1,6 @@
 'use client';
 import { apiGet } from '@/lib/api';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 
@@ -29,87 +29,87 @@ export function useMyProperties() {
     const fetchTimeoutRef = useRef<NodeJS.Timeout>();
     const lastFetchRef = useRef<number>(0);
     const propertiesRef = useRef<Property[]>([]);
+
+    const fetchMyProperties = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token || !validateToken(token)) {
+                throw new Error('Not authenticated');
+            }
+
+            // Prevent multiple fetches within 2 seconds
+            const now = Date.now();
+            if (now - lastFetchRef.current < 2000) {
+                return;
+            }
+            lastFetchRef.current = now;
+
+            console.log('Fetching host properties...');
+            const data = await apiGet<Property[]>('/v1/properties/mine', token);
+            console.log('Received host properties:', data);
+            
+            if (mountedRef.current) {
+                // Deduplicate properties by property_id
+                const uniqueProperties = Array.from(
+                    new Map(data.map(property => [property.property_id, property])).values()
+                );
+                
+                // Only update if the properties have actually changed
+                if (JSON.stringify(uniqueProperties) !== JSON.stringify(propertiesRef.current)) {
+                    propertiesRef.current = uniqueProperties;
+                    setProperties(uniqueProperties);
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching host properties:', err);
+            if (mountedRef.current) {
+                setError(err as Error);
+            }
+        } finally {
+            if (mountedRef.current) {
+                setLoading(false);
+            }
+        }
+    }, []);
+
+    const validateToken = (token: string): boolean => {
+        try {
+            const decoded = jwtDecode<JWTPayload>(token);
+            const currentTime = Math.floor(Date.now() / 1000);
+            return decoded.exp > currentTime;
+        } catch {
+            return false;
+        }
+    };
   
     useEffect(() => {
-      mountedRef.current = true;
-      
-      return () => {
-        mountedRef.current = false;
-        if (fetchTimeoutRef.current) {
-          clearTimeout(fetchTimeoutRef.current);
-        }
-      };
+        mountedRef.current = true;
+        
+        return () => {
+            mountedRef.current = false;
+            if (fetchTimeoutRef.current) {
+                clearTimeout(fetchTimeoutRef.current);
+            }
+        };
     }, []);
 
     useEffect(() => {
-      if (!isAuthenticated || userRole !== 'host') {
-        setProperties([]);
-        propertiesRef.current = [];
-        setLoading(false);
-        return;
-      }
-
-      const validateToken = (token: string): boolean => {
-        try {
-          const decoded = jwtDecode<JWTPayload>(token);
-          const currentTime = Math.floor(Date.now() / 1000);
-          return decoded.exp > currentTime;
-        } catch {
-          return false;
-        }
-      };
-
-      async function fetchMyProperties() {
-        try {
-          const token = localStorage.getItem('token');
-          if (!token || !validateToken(token)) {
-            throw new Error('Not authenticated');
-          }
-
-          // Prevent multiple fetches within 2 seconds
-          const now = Date.now();
-          if (now - lastFetchRef.current < 2000) {
-            return;
-          }
-          lastFetchRef.current = now;
-
-          console.log('Fetching host properties...');
-          const data = await apiGet<Property[]>('/v1/properties/mine', token);
-          console.log('Received host properties:', data);
-          
-          if (mountedRef.current) {
-            // Deduplicate properties by property_id
-            const uniqueProperties = Array.from(
-              new Map(data.map(property => [property.property_id, property])).values()
-            );
-            
-            // Only update if the properties have actually changed
-            if (JSON.stringify(uniqueProperties) !== JSON.stringify(propertiesRef.current)) {
-              propertiesRef.current = uniqueProperties;
-              setProperties(uniqueProperties);
-            }
-          }
-        } catch (err) {
-          console.error('Error fetching host properties:', err);
-          if (mountedRef.current) {
-            setError(err as Error);
-          }
-        } finally {
-          if (mountedRef.current) {
+        if (!isAuthenticated || userRole !== 'host') {
+            setProperties([]);
+            propertiesRef.current = [];
             setLoading(false);
-          }
+            return;
         }
-      }
 
-      // Clear any existing timeout
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
-      }
+        // Clear any existing timeout
+        if (fetchTimeoutRef.current) {
+            clearTimeout(fetchTimeoutRef.current);
+        }
 
-      // Add a small delay to prevent multiple rapid fetches
-      fetchTimeoutRef.current = setTimeout(fetchMyProperties, 500);
+        // Add a small delay to prevent multiple rapid fetches
+        fetchTimeoutRef.current = setTimeout(fetchMyProperties, 500);
 
-    }, [isAuthenticated, userRole]);
+    }, [isAuthenticated, userRole, fetchMyProperties]);
   
-    return { properties, loading, error };
+    return { properties, loading, error, refetch: fetchMyProperties };
 } 

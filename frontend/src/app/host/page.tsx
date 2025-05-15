@@ -6,9 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Image from 'next/image';
+import { apiDelete } from '@/lib/api';
 
 export default function HostDashboard() {
-  const { properties, loading, error } = useMyProperties();
+  const { properties, loading, error, refetch } = useMyProperties();
   const { userRole, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -20,6 +21,25 @@ export default function HostDashboard() {
       router.push('/');
     }
   }, [isAuthenticated, userRole, router]);
+
+  const handleDelete = async (propertyId: number) => {
+    if (!window.confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      await apiDelete(`/v1/properties/${propertyId}`, token);
+      // Refresh the properties list without reloading the page
+      await refetch();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete property');
+    }
+  };
 
   if (loading) {
     return (
@@ -68,33 +88,29 @@ export default function HostDashboard() {
                 key={property.property_id}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden"
               >
-                {property.picture_urls && property.picture_urls.length > 0 && (
-                  <div className="relative h-48 w-full">
-                    <img
-                      src={property.picture_urls[0]}
-                      alt={property.title}
-                      className="object-cover w-full h-full"
-                    />
+                <Link href={`/properties/${property.property_id}`}>
+                  {property.picture_urls && property.picture_urls.length > 0 && (
+                    <div className="relative h-48 w-full">
+                      <img
+                        src={property.picture_urls[0]}
+                        alt={property.title}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">{property.title}</h2>
+                    <p className="text-gray-600 mb-1">{property.address}</p>
+                    <p className="text-gray-600 mb-1">{property.city}, {property.state}</p>
                   </div>
-                )}
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">{property.title}</h2>
-                  <p className="text-gray-600 mb-1">{property.address}</p>
-                  <p className="text-gray-600 mb-1">{property.city}, {property.state}</p>
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <Link
-                      href={`/host/properties/${property.property_id}/edit`}
-                      className="text-rose-500 hover:text-rose-600 font-medium"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => {/* TODO: Implement delete */}}
-                      className="text-gray-500 hover:text-gray-600 font-medium"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                </Link>
+                <div className="px-6 pb-4">
+                  <button
+                    onClick={() => handleDelete(property.property_id)}
+                    className="text-sm text-rose-500 hover:text-rose-600 transition"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
