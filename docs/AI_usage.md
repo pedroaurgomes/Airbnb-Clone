@@ -45,6 +45,15 @@ While AI tools were extremely helpful, I remained critically involved throughout
 - **Best Practices Awareness**:  
   Efficiency, scalability, and maintainability were prioritized, sometimes requiring manual refinements after AI-generated suggestions.
 
+- **Difficulty with deeper bugs**
+  I had an interesting case during the development of this project in which the relationships between tables in the database weren't working because of a misalignment between
+  the versions of SQLAlchemy and SQLModel (which is built on top of SQLAlchemy). I tried to use ChatGPT (unware of the whole context of the codebase - my iintuition:
+  it would do a "breath-oriented" search for solutions- and Cursor (context aware - my intuition: more "depth-oriented" search)  to debug the issue. However, both of them got stuck in a loop
+  where it proposes solution A, it doesn't work so it proposes solution B, and it also doesn't work, and it goes back to propose solution A, and then B, and get stuck in this loop. For my surprise,
+  ChatGPT got stuck way befoere cursor (I would say the chatgpt loop was A,B,A,B,... while cursor's loop was A,B,C,D,E,A,B,C,...). To solve the problem, I went after the old oracle (StackOverflow) and it
+  although it didn't completely solved my issue, it provided me enough understanding to improve my prompt and enhance it with new information that led to a loop breakage in cursor and, as a consequence,
+  we were able to fix the bug.
+
 ---
 
 ## 🧩 Summary
