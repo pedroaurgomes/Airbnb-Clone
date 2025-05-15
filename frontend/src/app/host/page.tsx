@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Image from 'next/image';
 
 export default function HostDashboard() {
   const { properties, loading, error } = useMyProperties();
@@ -42,7 +43,7 @@ export default function HostDashboard() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Properties</h1>
           <Link 
-            href="/host/properties/new" 
+            href="/host/add" 
             className="bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition"
           >
             Add New Property
@@ -54,7 +55,7 @@ export default function HostDashboard() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">No properties yet</h2>
             <p className="text-gray-600 mb-4">Start by adding your first property!</p>
             <Link 
-              href="/host/properties/new" 
+              href="/host/add" 
               className="inline-block bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition"
             >
               Add Your First Property
@@ -65,24 +66,35 @@ export default function HostDashboard() {
             {properties.map((property) => (
               <div 
                 key={property.property_id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6"
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden"
               >
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{property.title}</h2>
-                <p className="text-gray-600 mb-1">{property.address}</p>
-                <p className="text-gray-600 mb-1">{property.city}, {property.state}</p>
-                <div className="mt-4 flex justify-end space-x-2">
-                  <Link
-                    href={`/host/properties/${property.property_id}/edit`}
-                    className="text-rose-500 hover:text-rose-600 font-medium"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => {/* TODO: Implement delete */}}
-                    className="text-gray-500 hover:text-gray-600 font-medium"
-                  >
-                    Delete
-                  </button>
+                {property.picture_urls && property.picture_urls.length > 0 && (
+                  <div className="relative h-48 w-full">
+                    <img
+                      src={property.picture_urls[0]}
+                      alt={property.title}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+                <div className="p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">{property.title}</h2>
+                  <p className="text-gray-600 mb-1">{property.address}</p>
+                  <p className="text-gray-600 mb-1">{property.city}, {property.state}</p>
+                  <div className="mt-4 flex justify-end space-x-2">
+                    <Link
+                      href={`/host/properties/${property.property_id}/edit`}
+                      className="text-rose-500 hover:text-rose-600 font-medium"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => {/* TODO: Implement delete */}}
+                      className="text-gray-500 hover:text-gray-600 font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

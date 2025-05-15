@@ -6,9 +6,22 @@ import InputField from '@/components/InputField';
 import Button from '@/components/Button';
 import RoleSelector from '@/components/RoleSelector';
 import { apiPost } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface SignupResponse {
+  user: {
+    user_id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
+  access_token: string;
+  token_type: string;
+}
 
 export default function SignupPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -36,13 +49,21 @@ export default function SignupPage() {
         role,
       };
 
-      const response = await apiPost<{ token: string }>('/v1/users/signup', data);
+      const response = await apiPost<SignupResponse>('/v1/users/signup', data);
 
-      // Save the token (assuming backend returns { token: "..." })
-      localStorage.setItem('token', response.token);
+      if (!response.access_token) {
+        throw new Error('No access token received from server');
+      }
 
-      // Redirect to homepage
-      router.push('/');
+      // Login with the token and role
+      login(response.access_token, response.user.role);
+
+      // Redirect based on role
+      if (response.user.role === 'host') {
+        router.push('/host');
+      } else {
+        router.push('/');
+      }
     } catch (err: any) {
       console.error('Signup error:', err);
       setError(err.message || 'Something went wrong.');
