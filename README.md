@@ -32,23 +32,30 @@ I specially chose Next.js because I wanted to learn it, and Python because I hav
 
 ## ⚙️ Setup Instructions
 
-### **Clone the Repository**
+Obs: For following the setup it is required to have python3 installed in your machine.
 
+### **Clone the Repository**
+```
 git clone https://github.com/pedroaurgomes/Airbnb-Clone.git
 cd Airbnb-Clone
+```
 
 ### Start the Backend
+```
 cd backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 uvicorn api.main:app --reload
+```
 --> Backend will run at http://localhost:8000
 
 ### Start the Frontend
+```
 cd frontend
 npm install
 npm run dev
+```
 --> Frontend will run at http://localhost:3000
 
 ### environment
