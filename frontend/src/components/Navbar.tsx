@@ -2,9 +2,16 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const { isAuthenticated, isLoading, userRole, logout } = useAuth();
+  const pathname = usePathname();
+
+  const getHomeLink = () => {
+    if (!isAuthenticated || !userRole) return '/';
+    return userRole === 'host' ? '/host' : '/';
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
@@ -12,7 +19,10 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-[#FF5A5F] text-2xl font-bold">
+            <Link 
+              href={isLoading ? pathname : getHomeLink()} 
+              className="text-[#FF5A5F] text-2xl font-bold"
+            >
               airbnb-clone
             </Link>
           </div>

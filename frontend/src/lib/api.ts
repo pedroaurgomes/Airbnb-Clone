@@ -5,13 +5,35 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
  */
 async function handleResponse(response: Response) {
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('API Error:', {
-      status: response.status,
-      statusText: response.statusText,
-      data: errorData
-    });
-    const error = new Error(errorData.detail || 'API Error');
+    let errorMessage = 'API Error';
+    try {
+      const errorData = await response.json();
+      console.error('API Error Details:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: errorData
+      });
+      
+      // Handle validation errors
+      if (response.status === 422 && errorData.detail) {
+        if (Array.isArray(errorData.detail)) {
+          // Format validation errors
+          errorMessage = errorData.detail.map((err: any) => 
+            `${err.loc[err.loc.length - 1]}: ${err.msg}`
+          ).join(', ');
+        } else {
+          errorMessage = errorData.detail;
+        }
+      } else {
+        errorMessage = errorData.detail || errorData.message || JSON.stringify(errorData);
+      }
+    } catch (e) {
+      console.error('API Error (no JSON):', {
+        status: response.status,
+        statusText: response.statusText
+      });
+    }
+    const error = new Error(errorMessage);
     (error as any).status = response.status;
     throw error;
   }
@@ -57,6 +79,13 @@ export async function apiPost<T>(endpoint: string, body: any, token?: string): P
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
+
+  console.log('Making POST request:', {
+    url: `${apiUrl}${endpoint}`,
+    method: 'POST',
+    headers: { ...headers, Authorization: token ? 'Bearer [REDACTED]' : undefined },
+    body: body
+  });
 
   const response = await fetch(`${apiUrl}${endpoint}`, {
     method: 'POST',

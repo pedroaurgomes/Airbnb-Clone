@@ -5,10 +5,16 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead, UserLogin
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
+
+class SignupResponse(BaseModel):
+    user: UserRead
+    access_token: str
+    token_type: str = "bearer"
 
 router = APIRouter()
 
-@router.post("/signup", response_model=UserRead)
+@router.post("/signup", response_model=SignupResponse)
 def signup(user_create: UserCreate, session: Session = Depends(get_session)):
     # 1. Check if the user already exists
     statement = select(User).where(User.email == user_create.email)
@@ -31,10 +37,19 @@ def signup(user_create: UserCreate, session: Session = Depends(get_session)):
     # 4. Insert into database
     session.add(user)
     session.commit()
-    session.refresh(user) # making our user python object consistent to its current respective row in the db
+    session.refresh(user)
 
-    # 5. Return the created user (without password)
-    return user # pydantic will match it with our response model UserRead
+    # 5. Create access token
+    access_token = create_access_token(
+        data={"sub": str(user.user_id), "role": user.role}
+    )
+
+    # 6. Return both user data and access token
+    return {
+        "user": user,
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 @router.post("/login")
 def login(
