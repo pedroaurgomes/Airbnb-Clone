@@ -1,36 +1,43 @@
 'use client';
 
-import { useProperties } from '@/hooks/useProperties';
-import PropertyCard from '@/components/PropertyCard';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
-export default function GuestDashboard() {
-  const { properties, loading, error } = useProperties();
+export default function HomePage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
-  if (loading) {
-    return <p className="text-center text-gray-600 mt-8">Loading properties...</p>;
-  }
-
-  if (error) {
-    return <p className="text-center text-rose-500 mt-8">Error loading properties: {error.message}</p>;
-  }
-
-  if (properties.length === 0) {
-    return <p className="text-center text-gray-600 mt-8">No properties found.</p>;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/browse');
+    }
+  }, [isAuthenticated, router]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {properties.map((property) => (
-        <PropertyCard
-          key={property.property_id}
-          title={property.title}
-          address={property.address}
-          city={property.city}
-          state={property.state}
-          picture_urls={property.picture_urls}
-          host_name={property.host_name}
-        />
-      ))}
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-rose-500 mb-2">Welcome to Airbnb Clone</h1>
+          <p className="text-gray-600 mb-8">Find your perfect place to stay</p>
+        </div>
+        
+        <div className="space-y-4">
+          <Link 
+            href="/login"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/signup"
+            className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
+          >
+            Sign Up
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
