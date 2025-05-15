@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from sqlmodel import Field, Relationship
+from sqlmodel import Field
 from typing import Optional, ClassVar, Any
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import relationship
 from .base import SQLModelBase
 
 
@@ -19,3 +19,4 @@ class Property(SQLModelBase, table=True):
 
     # Define relationships using SQLAlchemy's relationship directly
     host: ClassVar[Any] = relationship("User", back_populates="properties")
+    bookings: ClassVar[Any] = relationship("Booking", back_populates="property")

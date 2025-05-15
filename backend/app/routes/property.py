@@ -6,6 +6,10 @@ from app.schemas.property import PropertyCreate, PropertyRead
 import json
 from app.core.dependencies import get_current_user
 from typing import List
+from sqlalchemy.orm import Session
+from app.models.booking import Booking
+from app.models.user import User
+from app.schemas.booking import BookingResponse
 
 
 router = APIRouter()
@@ -144,11 +148,11 @@ def get_property_details(
     session: Session = Depends(get_session),
     current_user: dict = Depends(get_current_user)
 ):
-    # Authorization: only guests can view property details
-    if current_user["role"] != "guest":
+    # Authorization: both guests and hosts can view property details
+    if current_user["role"] not in ["guest", "host"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only guests can view property details."
+            detail="Only guests and hosts can view property details."
         )
 
     property = session.get(Property, property_id)
@@ -170,3 +174,61 @@ def get_property_details(
     )
 
     return property_read
+
+
+@router.delete("/{property_id}")
+def delete_property(
+    property_id: int,
+    session: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user)
+):
+    # Authorization: only hosts can delete their own properties
+    if current_user["role"] != "host":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only hosts can delete properties."
+        )
+
+    property = session.get(Property, property_id)
+
+    if not property:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Property not found."
+        )
+
+    # Check if the property belongs to the current host
+    if property.host_id != current_user["user_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own properties."
+        )
+
+    session.delete(property)
+    session.commit()
+
+    return {"message": "Property deleted successfully"}
+
+
+@router.get("/{property_id}/bookings", response_model=List[BookingResponse])
+def get_property_bookings(
+    property_id: int,
+    session: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all bookings for a specific property"""
+    # Check if property exists
+    property = session.get(Property, property_id)
+    if not property:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Property not found"
+        )
+
+    # Get all bookings for this property
+    bookings = session.exec(
+        select(Booking)
+        .where(Booking.property_id == property_id)
+    ).all()
+    
+    return bookings

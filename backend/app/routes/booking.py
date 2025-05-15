@@ -5,6 +5,9 @@ from app.schemas.booking import BookingCreate, BookingRead
 from app.core.db import get_session
 from app.core.dependencies import get_current_user
 from sqlmodel import Session, select
+from typing import List
+from app.schemas.booking import BookingWithProperty
+import json
 
 
 router = APIRouter()
@@ -62,3 +65,45 @@ def create_booking(
     session.refresh(new_booking)
 
     return new_booking
+
+@router.get("/my-bookings", response_model=List[BookingWithProperty])
+def get_my_bookings(
+    session: Session = Depends(get_session),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all bookings for the current user with property details"""
+    # Only guests can view their bookings
+    if current_user["role"] != "guest":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only guests can view their bookings."
+        )
+
+    # Get all bookings for this user with property details
+    statement = (
+        select(Booking)
+        .join(Property)
+        .where(Booking.guest_id == current_user["user_id"])
+        .order_by(Booking.date_in.desc())
+    )
+    bookings = session.exec(statement).all()
+    
+    # Transform the bookings to include property details with parsed picture_urls
+    result = []
+    for booking in bookings:
+        property_data = booking.property
+        result.append({
+            "booking_id": booking.booking_id,
+            "date_in": booking.date_in,
+            "date_out": booking.date_out,
+            "property": {
+                "property_id": property_data.property_id,
+                "title": property_data.title,
+                "city": property_data.city,
+                "state": property_data.state,
+                "picture_urls": json.loads(property_data.picture_urls),
+                "host_name": property_data.host.name
+            }
+        })
+    
+    return result

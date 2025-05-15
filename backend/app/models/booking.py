@@ -1,9 +1,12 @@
-from sqlmodel import SQLModel, UniqueConstraint
-from datetime import date
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from __future__ import annotations
 
-class Booking(SQLModel, table=True):
+from sqlmodel import Field
+from typing import Optional, ClassVar, Any
+from sqlalchemy.orm import relationship
+from .base import SQLModelBase
+from datetime import date
+
+class Booking(SQLModelBase, table=True):
     __tablename__ = "bookings"
 
     booking_id: Optional[int] = Field(default=None, primary_key=True)
@@ -12,7 +15,6 @@ class Booking(SQLModel, table=True):
     date_in: date
     date_out: date
 
-    class Config:
-        table_constraints = (
-            UniqueConstraint("property_id", "date_in"),
-        )
+    # Define relationships using SQLAlchemy's relationship directly
+    guest: ClassVar[Any] = relationship("User", back_populates="bookings")
+    property: ClassVar[Any] = relationship("Property", back_populates="bookings")
