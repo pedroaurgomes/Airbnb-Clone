@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import InputField from '@/components/InputField';
 import Button from '@/components/Button';
+import { jwtDecode } from 'jwt-decode';
 
 export default function LoginPage() {
   const router = useRouter();
-
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export default function LoginPage() {
 
       // Create form data
       const formData = new FormData();
-      formData.append('username', email); // Note: OAuth2 expects 'username' not 'email'
+      formData.append('username', email);
       formData.append('password', password);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/login`, {
@@ -36,11 +38,20 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      
-      // Save the token
-      localStorage.setItem('token', data.access_token);
+      console.log('Login response data:', data);
 
-      // Redirect to homepage
+      // Decode the JWT token to get the role
+      const decodedToken = jwtDecode(data.access_token);
+      console.log('Decoded token:', decodedToken);
+      
+      // Extract the role from the decoded token
+      const role = decodedToken.role;
+      console.log('User role:', role);
+
+      // Login with the token and role
+      login(data.access_token, role);
+      
+      // Navigate to home page
       router.push('/');
     } catch (err: any) {
       console.error('Login error:', err);
