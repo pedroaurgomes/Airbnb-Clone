@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --airbnb-red: #FF5A5F;
+  --airbnb-dark-red: #FF385C;
+  --airbnb-black: #222222;
+  --airbnb-gray: #717171;
+  --airbnb-light-gray: #DDDDDD;
+  --airbnb-white: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-[#222222] antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#FF5A5F] text-white px-4 py-2 rounded-lg hover:bg-[#FF385C] transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-[#222222] border border-[#DDDDDD] px-4 py-2 rounded-lg hover:border-[#222222] transition-colors;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
