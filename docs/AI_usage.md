@@ -15,8 +15,7 @@ This document explains how AI tools were leveraged during the development of the
 | **Architecture Design** | - Discussed user roles (Host vs Guest) and account management strategies. |
 | **Debugging** | - Helped interpret and solve error messages more quickly. |
 | **Frontend Component Building** | - Generated Next.js components based on hand-drawn sketches and requirements, accelerating the UI development. |
-| **Documentation** | - Generated the structure and summarized/organized the content of these documentation files based
-on notes I wrote down during development. |
+| **Documentation** | - Generated the structure and summarized/organized the content of these documentation files based on notes I wrote down during development. |
 
 ---
 
